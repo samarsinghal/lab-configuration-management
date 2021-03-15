@@ -1,7 +1,5 @@
 ## Define container environment variables using ConfigMap data
 
-### Define a container environment variable with data from a single ConfigMap
-
 1.  Define an environment variable as a key-value pair in a ConfigMap:
 
     ```execute

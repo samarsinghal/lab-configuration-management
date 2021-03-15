@@ -23,8 +23,7 @@ A Secret can be used with a Pod in three ways:
 ## Types of Secret {#secret-types}
 
 When creating a Secret, you can specify its type using the `type` field of
-the [`Secret`](/docs/reference/generated/kubernetes-api/{{< param "version" >}}/#secret-v1-core)
-resource, or certain equivalent `kubectl` command line flags (if available).
+the [`Secret`] resource, or certain equivalent `kubectl` command line flags (if available).
 The Secret type is used to facilitate programmatic handling of the Secret data.
 
 Kubernetes provides several builtin types for some common usage scenarios.

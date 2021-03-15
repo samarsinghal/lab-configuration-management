@@ -1,5 +1,3 @@
-## Using Secrets
-
 Secrets can be mounted as data volumes or exposed as container-env-variables
 to be used by a container in a Pod. Secrets can also be used by other parts of the
 system, without being directly exposed to the Pod. For example, Secrets can hold
@@ -96,8 +94,7 @@ propagation delay, where the cache propagation delay depends on the chosen cache
 
 ### Using Secrets as environment variables
 
-To use a secret in an {{< glossary_tooltip text="environment variable" term_id="container-env-variables" >}}
-in a Pod:
+To use a secret in an environment variable in a Pod:
 
 1. Create a secret or use an existing one.  Multiple Pods can reference the same secret.
 1. Modify your Pod definition in each container that you wish to consume the value of a secret key to add an environment variable for each secret key you wish to consume. The environment variable that consumes the secret key should populate the secret's name and key in `env[].valueFrom.secretKeyRef`.

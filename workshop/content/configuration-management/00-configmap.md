@@ -1,12 +1,10 @@
-# ConfigMap
-
 ConfigMaps allow you to decouple configuration artifacts from image content to keep containerized applications portable. This page provides a series of usage examples demonstrating how to create ConfigMaps and configure Pods using data stored in ConfigMaps.
 
 ## Create a ConfigMap
 
 Use the `kubectl create configmap` command to create ConfigMaps from [directories](#create-configmaps-from-directories), [files](#create-configmaps-from-files), or [literal values](#create-configmaps-from-literal-values):
 
-```execute
+```
 kubectl create configmap <map-name> <data-source>
 ```
 
@@ -149,7 +147,8 @@ kubectl create configmap game-config-3 --from-file=game-special-key=configmap/ga
 ```
 
 would produce the following ConfigMap:
-```
+
+```execute
 kubectl get configmaps game-config-3 -o yaml
 ```
 
