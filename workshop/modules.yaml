@@ -1,0 +1,19 @@
+modules:
+    workshop-overview:
+        name: Workshop Overview
+        exit_sign: Start Workshop
+    configuration-management/00-container-immutability:
+        name: Runtime security - immutable containers
+    configuration-management/01-system-hardening-tools:
+        name: System Hardening tools - Seccomp and AppArmor
+    configuration-management/02-static-analysis-kubesec:
+        name: Static Analysis - KubeSec
+    configuration-management/03-static-analysis-conftest:
+        name: Static Analysis - ConfTest
+    # configuration-management/04-admission-controller:
+    #     name: Admission Controller
+    configuration-management/04-image-scanning-trivy:
+        name: Image Scanning - Clair and Trivy
+    workshop-summary:
+        name: Workshop Summary
+        exit_sign: Finish Workshop
