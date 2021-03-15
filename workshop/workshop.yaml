@@ -1,12 +1,11 @@
-name: Container Security 02
+name: Container Configuration Management
 
 modules:
     activate:
     - workshop-overview
-    - container-security/00-container-immutability
-    - container-security/01-system-hardening-tools
-    - container-security/02-static-analysis-kubesec
-    - container-security/03-static-analysis-conftest
-    # - container-security/04-admission-controller
-    - container-security/04-image-scanning-trivy
+    - configuration-management/00-configmap
+    - configuration-management/01-use-configmap
+    - configuration-management/02-secrets
+    - configuration-management/03-use-secrets
+    - configuration-management/04-sealed-secrets
     - workshop-summary
