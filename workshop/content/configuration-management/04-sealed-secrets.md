@@ -10,23 +10,23 @@ The kubeseal utility uses asymmetric crypto to encrypt secrets that only the con
 
 When the operator starts, it generates a private and public key. The private key stays in the cluster, but you can retrieve the public key with the kubeseal CLI:
 
-  kubeseal --fetch-cert > mycert.pem
+    kubeseal --fetch-cert > mycert.pem
 
 Once you have the public key, you can encrypt all your secrets. Storing the public key and the secrets in the repository are safe, even if the repo is public, as the public key is used only for encryption.
 
 Assuming you have a secret in JSON format like this:
 
-  {
-    "kind": "Secret",
-    "apiVersion": "v1",
-    "metadata": {
-        "name": "mysecret",
-        "creationTimestamp": null
-    },
-    "data": {
-        "foo": "YmFy"
+    {
+      "kind": "Secret",
+      "apiVersion": "v1",
+      "metadata": {
+          "name": "mysecret",
+          "creationTimestamp": null
+      },
+      "data": {
+          "foo": "YmFy"
+      }
     }
-  }
 
 You can encrypt the secret with:
 
