@@ -19,6 +19,121 @@ A Secret can be used with a Pod in three ways:
 - As [container environment variable](#using-secrets-as-environment-variables).
 - By the [kubelet when pulling images](#using-imagepullsecrets) for the Pod.
 
+## Create a Secret
+
+There are several options to create a Secret:
+
+- [create Secret using `kubectl` command](/docs/tasks/configmap-secret/managing-secret-using-kubectl/)
+- [create Secret from config file](/docs/tasks/configmap-secret/managing-secret-using-config-file/)
+- [create Secret using kustomize](/docs/tasks/configmap-secret/managing-secret-using-kustomize/)
+
+### Create a Secret manually
+
+To create the Secret containing the MYSQL_ROOT_PASSWORD, choose a password and convert it to base64:
+
+Lets Say The root password will be "KubernetesRocks!"
+
+```execute
+echo -n 'KubernetesRocks!' | base64
+```
+
+S3ViZXJuZXRlc1JvY2tzIQ==
+
+Make a note of the encoded string. You need it to create the YAML file for the Secret:
+
+```execute
+cat mysql-secret.yaml
+```
+
+Create the Secret in Kubernetes with the kubectl apply command:
+
+```execute
+kubectl apply -f mysql-secret.yaml
+```
+
+secret/db-root-password created
+
+View the newly created Secret 
+
+Now that you've created the Secret, use kubectl describe to see it:
+
+```execute
+kubectl describe secret db-root-password
+```
+
+Name:         db-root-password
+Namespace:    secrets-and-configmaps
+Labels:       <none>
+Annotations:
+Type:         Opaque
+
+Data
+====
+password:  16 bytes
+Note that the Data field contains the key you set in the YAML: password. The value assigned to that key is the password you created, but it is not shown in the output. Instead, the value's size is shown in its place, in this case, 16 bytes.
+
+You can also use the kubectl edit secret <secretname> command to edit the Secret and kubectl get secret <secretname> -o yaml to view secret.
+
+```execute
+kubectl get secret db-root-password -o yaml
+```
+
+Again, the data field with the password key is visible, and this time you can see the base64-encoded Secret.
+
+Decode the Secret
+Let's say you need to view the Secret in plain text, for example, to verify that the Secret was created with the correct content. You can do this by decoding it.
+
+It is easy to decode the Secret by extracting the value and piping it to base64. In this case, you will use the output format -o jsonpath=<path> to extract only the Secret value using a JSONPath template.
+
+Returns the base64 encoded secret string
+
+```execute
+kubectl get secret db-root-password -o jsonpath='{.data.password}'
+```
+
+S3ViZXJuZXRlc1JvY2tzIQ==
+
+Pipe it to `base64 --decode -` to decode:
+
+```execute
+kubectl get secret db-root-password -o jsonpath='{.data.password}' | base64 --decode -
+```
+
+KubernetesRocks!
+
+
+
+### Another way to create Secrets
+You can also create Secrets directly using the kubectl create secret command. The db image permits setting up a regular database user with a password by setting the MYSQL_USER and MYSQL_PASSWORD environment variables. A Secret can hold more than one key/value pair, so you can create a single Secret to hold both strings. As a bonus, by using kubectl create secret, you can let Kubernetes mess with base64 so that you don't have to.
+
+```execute
+kubectl create secret generic db-user-creds \
+      --from-literal=MYSQL_USER=kubeuser\
+      --from-literal=MYSQL_PASSWORD=kube-still-rocks
+```
+
+secret/db-user-creds created
+
+Note the --from-literal, which sets the key name and the value all in one. You can pass as many --from-literal arguments as you need to create one or more key/value pairs in the Secret.
+
+Validate that the username and password were created and stored correctly with the kubectl get secrets command:
+
+### Get the username
+
+```execute
+kubectl get secret db-user-creds -o jsonpath='{.data.MYSQL_USER}' | base64 --decode -
+```
+
+kubeuser
+
+### Get the password
+
+```execute
+kubectl get secret db-user-creds -o jsonpath='{.data.MYSQL_PASSWORD}' | base64 --decode -
+```
+
+kube-still-rocks
+
 
 ## Types of Secret {#secret-types}
 
@@ -136,42 +251,6 @@ data:
     "<base64 encoded ~/.dockercfg file>"
 ```
 
-If you do not want to perform the base64 encoding, you can choose to use the
-`stringData` field instead.
-
-When you create these types of Secrets using a manifest, the API
-server checks whether the expected key does exists in the `data` field, and
-it verifies if the value provided can be parsed as a valid JSON. The API
-server doesn't validate if the JSON actually is a Docker config file.
-
-When you do not have a Docker config file, or you want to use `kubectl`
-to create a Docker registry Secret, you can do:
-
-```execute
-kubectl create secret docker-registry secret-tiger-docker \
-  --docker-username=tiger \
-  --docker-password=pass113 \
-  --docker-email=tiger@acme.com
-```
-
-This command creates a Secret of type `kubernetes.io/dockerconfigjson`.
-If you dump the `.dockerconfigjson` content from the `data` field, you will
-get the following JSON content which is a valid Docker configuration created
-on the fly:
-
-```json
-{
-  "auths": {
-    "https://index.docker.io/v1/": {
-      "username": "tiger",
-      "password": "pass113",
-      "email": "tiger@acme.com",
-      "auth": "dGlnZXI6cGFzczExMw=="
-    }
-  }
-}
-```
-
 ### Basic authentication Secret
 
 The `kubernetes.io/basic-auth` type is provided for storing credentials needed
@@ -269,22 +348,6 @@ for credentials used for TLS server and/or client. However, using the builtin Se
 type helps ensure the consistency of Secret format in your project; the API server
 does verify if the required keys are provided in a Secret configuration.
 
-When creating a TLS Secret using `kubectl`, you can use the `tls` subcommand
-as shown in the following example:
-
-```execute
-kubectl create secret tls my-tls-secret \
-  --cert=path/to/cert/file \
-  --key=path/to/key/file
-```
-
-The public/private key pair must exist before hand. The public key certificate
-for `--cert` must be .PEM encoded (Base64-encoded DER format), and match the
-given private key for `--key`.
-The private key must be in what is commonly called PEM private key format,
-unencrypted. In both cases, the initial and the last lines from PEM (for
-example, `--------BEGIN CERTIFICATE-----` and `-------END CERTIFICATE----` for
-a cetificate) are *not* included.
 
 ### Bootstrap token Secrets
 
@@ -353,116 +416,8 @@ stringData:
   usage-bootstrap-signing: "true"
 ```
 
-## Create a Secret
+Cleanup
 
-There are several options to create a Secret:
-
-- [create Secret using `kubectl` command](/docs/tasks/configmap-secret/managing-secret-using-kubectl/)
-- [create Secret from config file](/docs/tasks/configmap-secret/managing-secret-using-config-file/)
-- [create Secret using kustomize](/docs/tasks/configmap-secret/managing-secret-using-kustomize/)
-
-### Create a Secret manually
-
-To create the Secret containing the MYSQL_ROOT_PASSWORD, choose a password and convert it to base64:
-
-Lets Say The root password will be "KubernetesRocks!"
-
-```execute
-echo -n 'KubernetesRocks!' | base64
-```
-
-S3ViZXJuZXRlc1JvY2tzIQ==
-
-Make a note of the encoded string. You need it to create the YAML file for the Secret:
-
-```execute
-cat mysql-secret.yaml
-```
-
-Create the Secret in Kubernetes with the kubectl apply command:
-
-```execute
-kubectl apply -f mysql-secret.yaml
-```
-
-secret/db-root-password created
-
-View the newly created Secret 
-
-Now that you've created the Secret, use kubectl describe to see it:
-
-```execute
-kubectl describe secret db-root-password
-```
-
-Name:         db-root-password
-Namespace:    secrets-and-configmaps
-Labels:       <none>
-Annotations:
-Type:         Opaque
-
-Data
-====
-password:  16 bytes
-Note that the Data field contains the key you set in the YAML: password. The value assigned to that key is the password you created, but it is not shown in the output. Instead, the value's size is shown in its place, in this case, 16 bytes.
-
-You can also use the kubectl edit secret <secretname> command to edit the Secret and kubectl get secret <secretname> -o yaml to view secret.
-
-```execute
-kubectl get secret db-root-password -o yaml
-```
-
-Again, the data field with the password key is visible, and this time you can see the base64-encoded Secret.
-
-Decode the Secret
-Let's say you need to view the Secret in plain text, for example, to verify that the Secret was created with the correct content. You can do this by decoding it.
-
-It is easy to decode the Secret by extracting the value and piping it to base64. In this case, you will use the output format -o jsonpath=<path> to extract only the Secret value using a JSONPath template.
-
-Returns the base64 encoded secret string
-
-```execute
-kubectl get secret db-root-password -o jsonpath='{.data.password}'
-```
-
-S3ViZXJuZXRlc1JvY2tzIQ==
-
-Pipe it to `base64 --decode -` to decode:
-
-```execute
-kubectl get secret db-root-password -o jsonpath='{.data.password}' | base64 --decode -
-```
-
-KubernetesRocks!
-
-
-
-### Another way to create Secrets
-You can also create Secrets directly using the kubectl create secret command. The db image permits setting up a regular database user with a password by setting the MYSQL_USER and MYSQL_PASSWORD environment variables. A Secret can hold more than one key/value pair, so you can create a single Secret to hold both strings. As a bonus, by using kubectl create secret, you can let Kubernetes mess with base64 so that you don't have to.
-
-```execute
-kubectl create secret generic db-user-creds \
-      --from-literal=MYSQL_USER=kubeuser\
-      --from-literal=MYSQL_PASSWORD=kube-still-rocks
-```
-
-secret/db-user-creds created
-
-Note the --from-literal, which sets the key name and the value all in one. You can pass as many --from-literal arguments as you need to create one or more key/value pairs in the Secret.
-
-Validate that the username and password were created and stored correctly with the kubectl get secrets command:
-
-### Get the username
-
-```execute
-kubectl get secret db-user-creds -o jsonpath='{.data.MYSQL_USER}' | base64 --decode -
-```
-
-kubeuser
-
-### Get the password
-```execute
-kubectl get secret db-user-creds -o jsonpath='{.data.MYSQL_PASSWORD}' | base64 --decode -
-```
-
-kube-still-rocks
+  ```execute
+  kubectl delete secrets db-root-password db-user-creds empty-secret
+  ```

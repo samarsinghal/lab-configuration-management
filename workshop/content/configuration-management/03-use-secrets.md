@@ -46,6 +46,10 @@ files and the secret values are base64 decoded and stored inside these files.
 This is the result of commands executed inside the container from the example above:
 
 ```execute
+kubectl exec mypod -it -- /bin/sh
+```
+
+```execute
 ls /etc/foo/
 ```
 
@@ -74,6 +78,10 @@ The output is similar to:
 
 ```
 1f2d1e2e67df
+```
+
+```execute
+exit
 ```
 
 The program in a container is responsible for reading the secrets from the files.
@@ -118,6 +126,10 @@ Inside a container that consumes a secret in the environment variables, the secr
 normal environment variables containing the base64 decoded values of the secret data.
 This is the result of commands executed inside the container from the example above:
 
+```execute
+kubectl exec secret-env-pod -it -- /bin/sh
+```
+
 ```shell
 echo $SECRET_USERNAME
 ```
@@ -136,6 +148,10 @@ The output is similar to:
 
 ```
 1f2d1e2e67df
+```
+
+```execute
+exit
 ```
 
 #### Environment variables are not updated after a secret update
@@ -257,3 +273,9 @@ Secrets are protected when transmitted over these channels.
    single node.
 
 
+Cleanup
+
+```execute
+kubectl delete pods mypod secret-env-pod
+kubectl delete secret mysecret
+```

@@ -30,9 +30,15 @@ Assuming you have a secret in JSON format like this:
 
 You can encrypt the secret with:
 
-    kubeseal < mysecret.json >mysealedsecret.json
+    ```execute
+    kubeseal < mysecret.json > mysealedsecret.json
+    ```
 
-The kubeseal tool reads the JSON/YAML representation of a Secret on stdin, and produces the equivalent (encrypted) SealedSecret on stdout. A Secret can be created in many ways, but one of the easiest is using kubectl create secret --dry-run, as shown in the following example. Note again that the kubectl --dry-run just creates a local file and doesn't upload anything to the cluster.
+The kubeseal tool reads the JSON/YAML representation of a Secret on stdin, and produces the equivalent (encrypted) SealedSecret on stdout. 
+
+    ```execute
+    cat mysealedsecret.json
+    ```
 
 The new file contains a Custom Resourced Definition (CRD):
 
@@ -60,14 +66,18 @@ The new file contains a Custom Resourced Definition (CRD):
 
 You can use the above file to create a SealedSecret in your cluster. 
 
+    ```execute
     kubectl create -f mysealedsecret.json
+    ```
 
 The operator is watching for resources. As soon as it finds a SealedSecret, it uses the private key to decrypt the values and create a standard Kubernetes secret. Once decrypted by the controller, the enclosed Secret can be used exactly like a regular K8s Secret (it is a regular K8s Secret at this point!). If the SealedSecret object is deleted, the controller will garbage collect the generated Secret.
 
 
 You can verify that the secret was created successfully with:
 
+    ```execute
     kubectl get secrets mysecret -o yaml
+    ```
 
 Please notice that the secret created by the operator has the same name as the SealedSecret. You can use the Secrets in your Pods to inject environment variables or mount them as files.
 
@@ -102,5 +112,9 @@ Same concept You can store the value safely your repository even if public. Only
 Your application can then consume this file to consume the decrypted secrets. Being able to encrypt and store one secret at the time is convenient if you gradually need to add more secrets to your app.
 
 
+Cleanup
 
+    ```execute
+    kubectl delete -f mysealedsecret.json
+    ```
 

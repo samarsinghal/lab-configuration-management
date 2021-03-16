@@ -26,7 +26,7 @@
 
 ## Configure all key-value pairs in a ConfigMap as container environment variables
 
-* Create a ConfigMap containing multiple key-value pairs.
+Create a ConfigMap containing multiple key-value pairs.
 
   ```execute
   cat configmap-multikeys.yaml
@@ -38,13 +38,13 @@ Create the ConfigMap:
   kubectl create -f configmap-multikeys.yaml
   ```
 
-* Use `envFrom` to define all of the ConfigMap's data as container environment variables. The key from the ConfigMap becomes the environment variable name in the Pod.
+Use `envFrom` to define all of the ConfigMap's data as container environment variables. The key from the ConfigMap becomes the environment variable name in the Pod.
 
   ```execute
   cat pod-configmap-envFrom.yaml
   ```
 
- Create the Pod:
+Create the Pod:
 
   ```execute
   kubectl create -f pod-configmap-envFrom.yaml
@@ -70,7 +70,7 @@ The examples in this section refer to a ConfigMap named special-config, shown be
 Create the ConfigMap, if it's not created:
 
   ```execute
-  kubectl create -f configmap-multikeys.yaml
+  kubectl apply -f configmap-multikeys.yaml
   ```
 
 ### Populate a Volume with data stored in a ConfigMap
@@ -89,10 +89,30 @@ Create the Pod:
   kubectl create -f pod-configmap-volume.yaml
   ```
 
+Lets exec in to pod and check the volume mount
+
+  ```execute
+  kubectl exec -it multikey-configmap-volume -- /bin/sh
+  ```
+
 When the pod runs, the command `ls /etc/config/` produces the output below:
+
+  ```execute
+  ls /etc/config/
+  ```
 
   SPECIAL_LEVEL
   SPECIAL_TYPE
+
+  ```execute
+  cat /etc/config/SPECIAL_LEVEL
+  cat /etc/config/SPECIAL_TYPE
+  ```
+
+  ```execute
+  exit
+  ```
+
 
 If there are some files in the `/etc/config/` directory, they will be deleted.
 
@@ -109,18 +129,44 @@ A container using a ConfigMap as a [subPath](/docs/concepts/storage/volumes/#usi
 
 - You must create a ConfigMap before referencing it in a Pod specification (unless you mark the ConfigMap as "optional"). If you reference a ConfigMap that doesn't exist, the Pod won't start. Likewise, references to keys that don't exist in the ConfigMap will prevent the pod from starting.
 
-- If you use `envFrom` to define environment variables from ConfigMaps, keys that are considered invalid will be skipped. The pod will be allowed to start, but the invalid names will be recorded in the event log (`InvalidVariableNames`). The log message lists each skipped key. For example:
 
-   ```execute
-   kubectl get events
-   ```
+  Delete pods and configMaps 
 
-   The output is similar to this:
-   ```
-   LASTSEEN FIRSTSEEN COUNT NAME          KIND  SUBOBJECT  TYPE      REASON                            SOURCE                MESSAGE
-   0s       0s        1     dapi-test-pod Pod              Warning   InvalidEnvironmentVariableNames   {kubelet, 127.0.0.1}  Keys [1badkey, 2alsobad] from the EnvFrom configMap default/myconfig were skipped since they are considered invalid environment variable names.
-   ```
+    ```execute
+    kubectl delete pods multikey-configmap-env-variable multikey-configmap-volume
+    kubectl delete configmap configmap-multikeys
+    ```
+
+  Now create pods with out config maps
+
+    ```execute
+    kubectl create -f pod-configmap-volume.yaml
+    kubectl create -f pod-configmap-envFrom.yaml
+    ```
+
+  Check Pod status
+
+    ```execute
+    kubectl get pods
+    ```
+
+  Output 
+
+    NAME                              READY   STATUS                       RESTARTS   AGE
+    multikey-configmap-env-variable   0/1     CreateContainerConfigError   0          6s
+    multikey-configmap-volume         0/1     ContainerCreating            0          13s
+
+    Pod with configmap mount as volume will wait for configMap to be available
+    Pod with configmap as an env variable will fail on creation
 
 - ConfigMaps reside in a specific namespace. A ConfigMap can only be referenced by pods residing in the same namespace.
 
 - You can't use ConfigMaps for static pods, because the Kubelet does not support this.
+
+
+Cleanup
+
+    ```execute
+    kubectl delete pods multikey-configmap-env-variable multikey-configmap-volume single-configmap-env-variable
+    kubectl delete configmap configmap-multikeys special-config
+    ```
