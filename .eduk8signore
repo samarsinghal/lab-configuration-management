@@ -7,4 +7,3 @@
 ./kustomization.yaml
 ./resources
 ./admission-controller
-./configmap-secret
