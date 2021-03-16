@@ -130,7 +130,7 @@ This is the result of commands executed inside the container from the example ab
 kubectl exec secret-env-pod -it -- /bin/sh
 ```
 
-```shell
+```execute
 echo $SECRET_USERNAME
 ```
 
@@ -140,7 +140,7 @@ The output is similar to:
 admin
 ```
 
-```shell
+```execute
 echo $SECRET_PASSWORD
 ```
 

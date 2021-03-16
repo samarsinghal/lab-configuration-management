@@ -106,6 +106,9 @@ When the pod runs, the command `ls /etc/config/` produces the output below:
 
   ```execute
   cat /etc/config/SPECIAL_LEVEL
+  ```
+
+  ```execute
   cat /etc/config/SPECIAL_TYPE
   ```
 
@@ -127,37 +130,37 @@ A container using a ConfigMap as a [subPath](/docs/concepts/storage/volumes/#usi
 
 ### Restrictions
 
-- You must create a ConfigMap before referencing it in a Pod specification (unless you mark the ConfigMap as "optional"). If you reference a ConfigMap that doesn't exist, the Pod won't start. Likewise, references to keys that don't exist in the ConfigMap will prevent the pod from starting.
+You must create a ConfigMap before referencing it in a Pod specification (unless you mark the ConfigMap as "optional"). If you reference a ConfigMap that doesn't exist, the Pod won't start. Likewise, references to keys that don't exist in the ConfigMap will prevent the pod from starting.
 
 
   Delete pods and configMaps 
 
-    ```execute
-    kubectl delete pods multikey-configmap-env-variable multikey-configmap-volume
-    kubectl delete configmap configmap-multikeys
-    ```
+  ```execute
+  kubectl delete pods multikey-configmap-env-variable multikey-configmap-volume
+  kubectl delete configmap configmap-multikeys
+  ```
 
   Now create pods with out config maps
 
-    ```execute
-    kubectl create -f pod-configmap-volume.yaml
-    kubectl create -f pod-configmap-envFrom.yaml
-    ```
+  ```execute
+  kubectl create -f pod-configmap-volume.yaml
+  kubectl create -f pod-configmap-envFrom.yaml
+  ```
 
   Check Pod status
 
-    ```execute
-    kubectl get pods
-    ```
+  ```execute
+  kubectl get pods
+  ```
 
   Output 
 
-    NAME                              READY   STATUS                       RESTARTS   AGE
-    multikey-configmap-env-variable   0/1     CreateContainerConfigError   0          6s
-    multikey-configmap-volume         0/1     ContainerCreating            0          13s
+  NAME                              READY   STATUS                       RESTARTS   AGE
+  multikey-configmap-env-variable   0/1     CreateContainerConfigError   0          6s
+  multikey-configmap-volume         0/1     ContainerCreating            0          13s
 
-    Pod with configmap mount as volume will wait for configMap to be available
-    Pod with configmap as an env variable will fail on creation
+  Pod with configmap mount as volume will wait for configMap to be available
+  Pod with configmap as an env variable will fail on creation
 
 - ConfigMaps reside in a specific namespace. A ConfigMap can only be referenced by pods residing in the same namespace.
 
@@ -168,5 +171,5 @@ Cleanup
 
     ```execute
     kubectl delete pods multikey-configmap-env-variable multikey-configmap-volume single-configmap-env-variable
-    kubectl delete configmap configmap-multikeys special-config
+    kubectl delete configmap special-config
     ```
